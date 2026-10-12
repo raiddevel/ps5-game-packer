@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.ffpfsc
+*.exfat
+*.dat
+/docs/screenshots/*.tmp.png
+/tmp/
+/build/
+/dist/
+/packaging/venv-win/
+/packaging/unrar/
+*.egg-info/

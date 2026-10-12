@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: System packages (Linux: tkinter, unrar, xvfb)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb
+          sudo apt-get install -y unrar || true
+      - name: Test venv (CustomTkinter, pyzipper, pytest and the pinned engine)
+        shell: bash
+        run: |
+          python -m venv .venv-ci
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=.venv-ci/Scripts/python.exe; else PY=.venv-ci/bin/python; fi
+          "$PY" -m pip install --quiet --upgrade pip
+          "$PY" -m pip install --quiet "customtkinter>=5.2" "pyzipper>=0.3" "psutil>=5.9" pytest
+          PIN=$(python -c "import sys; sys.path.insert(0, '.'); from ps5_game_packer import environment; print(environment.MKPFS_PIN)")
+          "$PY" -m pip install --quiet "$PIN"
+      - name: Tests (Linux, virtual display)
+        if: runner.os == 'Linux'
+        env:
+          PS5_GAME_PACKER_VENV: ${{ github.workspace }}/.venv-ci
+        run: xvfb-run -a .venv-ci/bin/python -m pytest -q
+      - name: Tests (Windows)
+        if: runner.os == 'Windows'
+        env:
+          PS5_GAME_PACKER_VENV: ${{ github.workspace }}\.venv-ci
+          PYTHONUTF8: "1"
+        run: .venv-ci\Scripts\python.exe -m pytest -q
+      - name: Spanish catalog complete
+        run: python tools/strings.py locale/es.po
+      - name: Installer syntax
+        if: runner.os == 'Linux'
+        run: bash -n install.sh

@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ps5-game-packer"
+version = "2.1.2"
+description = "Pack a PS5 game folder or RAR/ZIP (plus updates and DLC) into a .ffpfsc container for ShadowMountPlus. Windows and Linux; English and Spanish."
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.10"
+authors = [{ name = "raiddevel", email = "raiddevel@gmail.com" }]
+keywords = ["ps5", "mkpfs", "ffpfsc", "pfs", "shadowmountplus"]
+classifiers = [
+    "Environment :: X11 Applications",
+    "Environment :: Win32 (MS Windows)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Archiving",
+]
+dependencies = [
+    "customtkinter>=5.2",
+    "pyzipper>=0.3",
+    "psutil>=5.9; sys_platform == 'win32'",  # pause and resume MkPFS on Windows (Linux and macOS use signals)
+    # Until MkPFS publishes a release with --archive-root and --layer on PyPI, the engine comes from the fork.
+    "mkpfs @ git+https://github.com/raiddevel/MkPFS.git@layered-source",
+]
+
+[project.optional-dependencies]
+tests = ["pytest>=7"]
+packaging = ["pyinstaller>=6.6", "pillow>=9"]
+
+[project.scripts]
+ps5-game-packer = "ps5_game_packer.app:main"
+
+[project.urls]
+Homepage = "https://github.com/raiddevel/ps5-game-packer"
+Changelog = "https://github.com/raiddevel/ps5-game-packer/blob/main/CHANGELOG.md"
+
+[tool.hatch.metadata]
+allow-direct-references = true  # the engine comes from a git URL until MkPFS publishes it on PyPI
+
+[tool.hatch.build.targets.wheel]
+packages = ["ps5_game_packer"]
+
+# locale/ and data/ live at the repository root (the .exe and the installer use them too); in the wheel they go
+# inside the package and environment.py finds them there.
+[tool.hatch.build.targets.wheel.force-include]
+"locale" = "ps5_game_packer/locale"
+"data" = "ps5_game_packer/data"
+
+[tool.hatch.build.targets.sdist]
+include = ["ps5_game_packer", "locale", "data", "tests", "tools", "packaging", "LICENSES",
+           "ps5-game-packer.py", "install.sh", "README.md", "README.es.md", "CHANGELOG.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

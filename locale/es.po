@@ -1,0 +1,562 @@
+# Spanish translation of PS5 Game Packer.
+# This file is distributed under the same license as the ps5-game-packer package (GPL-3.0-or-later).
+#
+# The source strings (msgid) are English; see README.md. The Spanish manual is README.es.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: ps5-game-packer 2.1.2\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ---- analysis.py
+
+msgid "under 1 min"
+msgstr "menos de 1 min"
+
+msgid "Password needed (or it is wrong)."
+msgstr "Hace falta contraseña (o es incorrecta)."
+
+msgid "unrar is not installed (on Debian, Ubuntu or Mint: sudo apt install unrar)."
+msgstr "unrar no está instalado (en Debian, Ubuntu o Mint: sudo apt install unrar)."
+
+msgid "Unsupported format: only RAR and ZIP."
+msgstr "Formato no admitido: solo RAR y ZIP."
+
+msgid "sce_sys/param.json cannot be read"
+msgstr "sce_sys/param.json no se puede leer"
+
+msgid "sce_sys/param.json is missing"
+msgstr "falta sce_sys/param.json"
+
+msgid "ShadowMountPlus will not be able to register the game. Replace it or add a valid one with \"Add param.json…\"."
+msgstr "ShadowMountPlus no podrá registrar el juego. Sustitúyelo o añade uno válido con «Añadir param.json…»."
+
+msgid "{h} h {m} min"
+msgstr "{h} h {m} min"
+
+msgid "Could not read the archive: {detail}"
+msgstr "No se pudo leer el archivo: {detail}"
+
+msgid "No active layer provides eboot.bin: the game will not start."
+msgstr "Ninguna capa activa trae eboot.bin: el juego no arrancará."
+
+msgid "base game"
+msgstr "juego base"
+
+msgid "update"
+msgstr "actualización"
+
+msgid "backport"
+msgstr "backport"
+
+msgid "DLC"
+msgstr "DLC"
+
+msgid "layer"
+msgstr "capa"
+
+msgid "{n} min"
+msgstr "{n} min"
+
+msgid "unrar could not read the archive: {detail}"
+msgstr "unrar no pudo leer el archivo: {detail}"
+
+msgid "Could not open the ZIP: {detail}"
+msgstr "No se pudo abrir el ZIP: {detail}"
+
+msgid "Cannot find the MkPFS engine at {path}."
+msgstr "No encuentro el motor MkPFS en {path}."
+
+msgid "Kept aside (not merged; install them later with the Package Installer): {items}"
+msgstr "Aparte (no se fusionan; van por el Package Installer después): {items}"
+
+msgid "Layers have different passwords and MkPFS takes only one per game: the one from \"{item}\" will be used and reading {items} will fail. Leave those layers out or extract them."
+msgstr "Hay capas con contraseñas distintas y MkPFS solo usa una por juego: se aplicará la de «{item}» y fallará la lectura de {items}. Deja esas capas fuera o extráelas."
+
+msgid "\"{winner}\" ({role}) replaces the eboot.bin of the backport \"{layer}\": you lose what lets the game run on lower firmwares. If you need it, move the backport above it (▲) or look for an update or DLC already adapted to that backport."
+msgstr "«{winner}» ({role}) sustituye el eboot.bin del backport «{layer}»: se pierde lo que permite jugar en firmwares inferiores. Si lo necesitas, sube el backport por encima (▲) o busca una actualización o DLC ya adaptados a ese backport."
+
+msgid "The DLC \"{dlc}\" brings its own eboot.bin and covers the one from \"{layer}\": that is usually fine, but check in the DLC notes that it is meant for this version of the game."
+msgstr "El DLC «{dlc}» trae su propio eboot.bin y tapa al de «{layer}»: es lo normal, pero comprueba en la documentación del DLC que es para esta versión del juego."
+
+msgid "{item} is the same game as {other} (same version and size): ignored."
+msgstr "{item} es el mismo juego que {other} (misma versión y tamaño): se ignora."
+
+msgid "No TITLE_ID in the name; assumed to belong to {tid}: {items}"
+msgstr "Sin TITLE_ID en el nombre; se asumen de {tid}: {items}"
+
+msgid "Ignored (cannot tell which game they belong to): {items}"
+msgstr "Ignorados (no sé de qué juego son): {items}"
+
+msgid "{tid}: only an update/DLC was found ({items}); the base game is missing."
+msgstr "{tid}: solo hay actualización/DLC ({items}) y falta el juego base."
+
+# ---- window.py
+
+msgid "PS5 Game Packer"
+msgstr "Comprimir juegos PS5"
+
+msgid "compressing"
+msgstr "comprimiendo"
+
+msgid "writing"
+msgstr "escribiendo"
+
+msgid "reading"
+msgstr "leyendo"
+
+msgid "verifying"
+msgstr "comprobando"
+
+msgid "scanning"
+msgstr "analizando"
+
+msgid "copying"
+msgstr "copiando"
+
+msgid "packing"
+msgstr "empaquetando"
+
+msgid "Scans the current path again without changing it (e.g. after extracting or adding files to the folder)"
+msgstr "Vuelve a analizar la ruta actual sin cambiarla (p. ej. tras extraer o añadir archivos en la carpeta)"
+
+msgid "Password:"
+msgstr "Contraseña:"
+
+msgid "Title [ID]"
+msgstr "Título [ID]"
+
+msgid "ID only"
+msgstr "Solo ID"
+
+msgid "Automatic (system language)"
+msgstr "Automático (el del sistema)"
+
+msgid "Stops MkPFS without cancelling, and resumes it; the time left freezes meanwhile"
+msgstr "Detiene MkPFS sin cancelar (y lo reanuda); el tiempo restante se congela mientras tanto"
+
+msgid "Restart the program now to change the language?"
+msgstr "¿Reiniciar ahora el programa para cambiar el idioma?"
+
+msgid "Choose the game's RAR or ZIP archive"
+msgstr "Elige el archivo RAR o ZIP del juego"
+
+msgid "Updates, backport or DLC for this game (optional)"
+msgstr "Actualizaciones, backport o DLC de este juego (opcional)"
+
+msgid "no eboot.bin"
+msgstr "sin eboot.bin"
+
+msgid "Replaces the game's sce_sys/param.json with a valid one: it is copied to a temporary folder and added as a layer on top (the top one wins). Use it when the game's own is missing or cannot be read."
+msgstr "Sustituye el sce_sys/param.json del juego por uno válido: se copia a una carpeta temporal y entra como capa encima (la de arriba manda). Úsalo cuando el del juego falta o no se puede leer."
+
+msgid "Choose the right param.json for this game"
+msgstr "Elige el param.json correcto de este juego"
+
+msgid "none of the active layers contains the whole game (eboot.bin + sce_sys/param.json)"
+msgstr "ninguna de las capas activas contiene el juego completo (eboot.bin + sce_sys/param.json)"
+
+msgid "the installed MkPFS cannot merge layers (no --layer option): update the engine with install.sh"
+msgstr "el MkPFS instalado no fusiona capas (le falta --layer): actualiza el motor con install.sh"
+
+msgid "the installed MkPFS cannot read RAR/ZIP (no --archive-root option): update the engine with install.sh"
+msgstr "el MkPFS instalado no lee RAR/ZIP (le falta --archive-root): actualiza el motor con install.sh"
+
+msgid "Game folder, a .rar/.zip, or a folder holding the game + its updates/DLC (folders or archives)"
+msgstr "Carpeta del juego, un .rar/.zip, o una carpeta con el juego + sus actualizaciones/DLC (carpetas o archivos)"
+
+msgid "Refresh"
+msgstr "Actualizar"
+
+msgid "Only if the archive asks for one (in batches it applies to every archive; each card can have its own)"
+msgstr "Solo si el archivo la pide (en lotes vale para todos los archivos; cada tarjeta puede tener la suya)"
+
+msgid "Show"
+msgstr "Mostrar"
+
+msgid "Choose a folder or an archive to scan it."
+msgstr "Elige una carpeta o un archivo para analizarlo."
+
+msgid "Folder for the .ffpfsc (e.g. the PS5 USB drive)"
+msgstr "Carpeta donde dejar el .ffpfsc (p. ej. el disco USB de la PS5)"
+
+msgid "Verify the image when done (slow: reads it all again)"
+msgstr "Comprobar la imagen al terminar (lento: vuelve a leerla entera)"
+
+msgid "Legacy two-pass method (temporary PFS image + compression). Only if a game does not mount with the normal method"
+msgstr "Método antiguo de dos pasadas (imagen PFS temporal + compresión). Solo si un juego no monta con el método normal"
+
+msgid "Empty = the destination folder. Only used by the two-pass method"
+msgstr "Vacío = la carpeta de destino. Solo la usa el método de dos pasadas"
+
+msgid "Pack"
+msgstr "Comprimir"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Pause"
+msgstr "Pausar"
+
+msgid "Ready."
+msgstr "Listo."
+
+msgid "The language will change the next time you open the program."
+msgstr "El idioma cambiará la próxima vez que abras el programa."
+
+msgid "RAR and ZIP archives"
+msgstr "Archivos RAR y ZIP"
+
+msgid "All files"
+msgstr "Todos los archivos"
+
+msgid "Scanning…"
+msgstr "Analizando…"
+
+msgid "{archive_size} archive with {content_size} inside · it will be packed"
+msgstr "Archivo de {archive_size} con {content_size} dentro · se comprimirá"
+
+msgid "read directly by MkPFS"
+msgstr "lectura directa por MkPFS"
+
+msgid "password-protected"
+msgstr "con contraseña"
+
+msgid "solid RAR: it will be slower"
+msgstr "RAR sólido: irá más lento"
+
+msgid "Password for this archive (otherwise the one above is used)"
+msgstr "Contraseña de este archivo (si no, se usa la general)"
+
+msgid "Layers, top to bottom (the top one overrides those below) · {who}"
+msgstr "Capas, de arriba abajo (la de arriba sustituye a las de abajo) · {who}"
+
+msgid "Move up: it will take priority over the ones below"
+msgstr "Subir: tendrá prioridad sobre las de abajo"
+
+msgid "Add folder…"
+msgstr "Añadir carpeta…"
+
+msgid "Add RAR/ZIP…"
+msgstr "Añadir RAR/ZIP…"
+
+msgid "Add an update, a backport or a DLC stored somewhere else"
+msgstr "Añade una actualización, un backport o un DLC que esté en otro sitio"
+
+msgid "Add param.json…"
+msgstr "Añadir param.json…"
+
+msgid "Choose the update or DLC folder"
+msgstr "Elige la carpeta de la actualización o del DLC"
+
+msgid "Choose the update or DLC RAR or ZIP archive"
+msgstr "Elige el RAR o ZIP de la actualización o del DLC"
+
+msgid "The source is inside an encrypted home folder (ecryptfs): reading will be slower. Next time, keep the games in an unencrypted folder."
+msgstr "El origen está en una carpeta personal cifrada (ecryptfs): la lectura será más lenta. Para la próxima vez, guarda los juegos en una carpeta sin cifrar."
+
+msgid "Choose a folder or an archive that contains a PS5 game."
+msgstr "Elige una carpeta o un archivo que contenga un juego de PS5."
+
+msgid "Choose a destination folder that exists."
+msgstr "Elige una carpeta de destino que exista."
+
+msgid "{n} s"
+msgstr "{n} s"
+
+msgid "{name}: {source} → {final} ({pct} %) at level {level} in {time}"
+msgstr "{name}: {source} → {final} ({pct} %) a nivel {level} en {time}"
+
+msgid "Cancelling…"
+msgstr "Cancelando…"
+
+msgid "Game:"
+msgstr "Juego:"
+
+msgid "Save to:"
+msgstr "Guardar en:"
+
+msgid "Advanced options"
+msgstr "Opciones avanzadas"
+
+msgid "Compression level:"
+msgstr "Nivel de compresión:"
+
+msgid "CPU cores:"
+msgstr "Núcleos:"
+
+msgid "Temporary folder:"
+msgstr "Carpeta temporal:"
+
+msgid "Container name:"
+msgstr "Nombre del contenedor:"
+
+msgid "Language:"
+msgstr "Idioma:"
+
+msgid "--auto: there is no game to pack in the source."
+msgstr "--auto: no hay ningún juego que comprimir en el origen."
+
+msgid "Reading the archive contents…"
+msgstr "Leyendo el contenido del archivo…"
+
+msgid "That is neither a folder nor a .rar/.zip archive."
+msgstr "Eso no es ni una carpeta ni un archivo .rar/.zip."
+
+msgid "final eboot.bin: the one from \"{item}\" ({role})"
+msgstr "eboot.bin final: el de «{item}» ({role})"
+
+msgid "not extracted"
+msgstr "sin extraer"
+
+msgid "This param.json replaces the game's own (temporary layer added with \"Add param.json…\")"
+msgstr "Este param.json sustituye al del juego (capa temporal añadida con «Añadir param.json…»)"
+
+msgid "This layer provides eboot.bin (the game executable)"
+msgstr "Esta capa trae eboot.bin (el ejecutable del juego)"
+
+msgid "What this layer is. If unsure, check the notes that come with the update or the DLC."
+msgstr "Qué es esta capa. Si no estás seguro, mira la documentación que acompaña a la actualización o al DLC."
+
+msgid "JSON files"
+msgstr "Archivos JSON"
+
+msgid "That layer is already in the list."
+msgstr "Esa capa ya está en la lista."
+
+msgid "Free at destination: {free}"
+msgstr "Libre en destino: {free}"
+
+msgid "The destination is FAT32: it cannot hold files over 4 GB. Use exFAT."
+msgstr "El destino es FAT32: no admite archivos de más de 4 GB. Usa exFAT."
+
+msgid "from the archive, without extracting"
+msgstr "desde el archivo, sin extraer"
+
+msgid "{m} min {s} s"
+msgstr "{m} min {s} s"
+
+msgid "MkPFS reads the archive directly, without extracting it."
+msgstr "MkPFS lee el archivo directamente, sin extraerlo."
+
+msgid "The two-pass method only works for a plain folder without layers: using the normal method."
+msgstr "El método de dos pasadas solo vale para una carpeta sin capas: se usa el método normal."
+
+msgid "Cancelled"
+msgstr "Cancelado"
+
+msgid "Cancelled. The half-written file has been deleted."
+msgstr "Cancelado. El archivo a medias se ha borrado."
+
+msgid "Cancelled by the user."
+msgstr "Cancelado por el usuario."
+
+msgid "Resume"
+msgstr "Reanudar"
+
+msgid "Paused: MkPFS is stopped until you press \"Resume\"."
+msgstr "En pausa: MkPFS está detenido hasta que pulses «Reanudar»."
+
+msgid "Resumed."
+msgstr "Reanudado."
+
+msgid "game folder or RAR/ZIP (+ update + DLC) → .ffpfsc container for ShadowMountPlus"
+msgstr "carpeta o RAR/ZIP del juego (+ actualización + DLC) → contenedor .ffpfsc para ShadowMountPlus"
+
+msgid "Folder…"
+msgstr "Carpeta…"
+
+msgid "RAR/ZIP…"
+msgstr "RAR/ZIP…"
+
+msgid "Choose…"
+msgstr "Elegir…"
+
+msgid "7 recommended · 4 faster and a bit larger · 9 maximum and slow"
+msgstr "7 recomendado · 4 más rápido y algo más grande · 9 máximo y lento"
+
+msgid "0 = automatic (all but one)"
+msgstr "0 = automático (todos menos uno)"
+
+msgid "\"Title [ID].ffpfsc\" with the title from param.json, or just \"ID.ffpfsc\". ShadowMountPlus does not care about the name: it reads the title from inside."
+msgstr "«Título [ID].ffpfsc» con el título de param.json, o solo «ID.ffpfsc». A ShadowMountPlus le da igual el nombre: lee el título de dentro."
+
+msgid "The change applies when the program restarts"
+msgstr "El cambio se aplica al reiniciar el programa"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "PS5 Game Packer {version} · engine: {engine}"
+msgstr "Comprimir juegos PS5 {version} · motor: {engine}"
+
+msgid "This MkPFS cannot read RAR/ZIP by itself (no --archive-root option): archives cannot be packed without extracting them. Update the engine with install.sh."
+msgstr "Este MkPFS no lee RAR/ZIP por sí mismo (le falta --archive-root): los archivos no se podrán comprimir sin extraerlos. Actualiza el motor con install.sh."
+
+msgid "This MkPFS cannot merge layers (no --layer option): game + update + DLC cannot be combined. Update the engine with install.sh."
+msgstr "Este MkPFS no fusiona capas (le falta --layer): no se podrán unir juego + actualización + DLC. Actualiza el motor con install.sh."
+
+msgid "without extracting it"
+msgstr "sin extraerlo"
+
+msgid "(no index; MkPFS will generate it)"
+msgstr "(sin índice; MkPFS lo generará)"
+
+msgid "{size} · {n} files"
+msgstr "{size} · {n} archivos"
+
+msgid "param.json: the one from \"{item}\""
+msgstr "param.json: el de «{item}»"
+
+msgid "{name} is not a valid param.json: it has to be a JSON object with titleId."
+msgstr "{name} no es un param.json válido: tiene que ser un objeto JSON con titleId."
+
+msgid "param.json added as a layer on top of {game}: {source}"
+msgstr "param.json añadido como capa encima de {game}: {source}"
+
+msgid "Scanning {name}…"
+msgstr "Analizando {name}…"
+
+msgid "The destination folder does not exist."
+msgstr "La carpeta de destino no existe."
+
+msgid "Continue?"
+msgstr "¿Continuar?"
+
+msgid "Layers (bottom to top): "
+msgstr "Capas (de abajo arriba): "
+
+msgid "No space left at the destination: MkPFS could not write the container ({free} free)."
+msgstr "No hay espacio en el destino: MkPFS no pudo escribir el contenedor (quedan {free} libres)."
+
+msgid "in {seconds} s"
+msgstr "en {seconds} s"
+
+msgid "Finished with errors"
+msgstr "Terminado con errores"
+
+msgid "{good} succeeded, {bad} failed. See the details."
+msgstr "{good} bien, {bad} con error. Mira los detalles."
+
+msgid "No space left at the destination"
+msgstr "No hay espacio en el destino"
+
+msgid "Done"
+msgstr "Hecho"
+
+msgid "Paused"
+msgstr "En pausa"
+
+msgid "MkPFS not found"
+msgstr "MkPFS no encontrado"
+
+msgid "Cannot find the MkPFS engine at {path}.\nInstall it with the program's install.sh (or set PS5_GAME_PACKER_VENV to a venv that has mkpfs and pyzipper)."
+msgstr "No encuentro el motor MkPFS en {path}.\nInstálalo con el script install.sh del programa (o define PS5_GAME_PACKER_VENV con la ruta de un venv que tenga mkpfs y pyzipper)."
+
+msgid "Cannot find UnRAR.exe: .rar sources cannot be read. Put it next to the program or install WinRAR."
+msgstr "No encuentro UnRAR.exe: los .rar no se podrán leer. Ponlo junto al programa o instala WinRAR."
+
+msgid "Type it above."
+msgstr "Escríbela arriba."
+
+msgid "up to {size} · {n} files"
+msgstr "hasta {size} · {n} archivos"
+
+msgid "{item}: wrong password"
+msgstr "{item}: contraseña incorrecta"
+
+msgid "{item}: password needed"
+msgstr "{item}: hace falta contraseña"
+
+msgid "That param.json belongs to {other}, not to {this}.\n\nAdd it anyway?"
+msgstr "Ese param.json es de {other}, no de {this}.\n\n¿Añadirlo igualmente?"
+
+msgid "There is nothing to add in {name}"
+msgstr "En {name} no hay nada que añadir"
+
+msgid "Kept aside (Package Installer later): {items}"
+msgstr "Aparte (Package Installer después): {items}"
+
+msgid "file system {fs}"
+msgstr "sistema de archivos {fs}"
+
+msgid "the game takes {size} uncompressed (the container usually ends up between 60 % and 75 %)"
+msgstr "el juego ocupa {size} sin comprimir (el contenedor suele quedar entre el 60 % y el 75 %)"
+
+msgid "{items}: sce_sys/param.json is missing or cannot be read, and ShadowMountPlus will not be able to register the game. Replace it with \"Add param.json…\".\n\nPack anyway?"
+msgstr "{items}: falta sce_sys/param.json o no se puede leer, y ShadowMountPlus no podrá registrar el juego. Sustitúyelo con «Añadir param.json…».\n\n¿Comprimir de todos modos?"
+
+msgid "There is {free} free at the destination and the game takes {size} uncompressed.\nThe container usually ends up between 60 % and 75 %, but that is not guaranteed.\n\nStart anyway?"
+msgstr "Hay {free} libres en el destino y el juego ocupa {size} sin comprimir.\nEl contenedor suele quedar entre el 60 % y el 75 %, pero no está garantizado.\n\n¿Empezar de todos modos?"
+
+msgid "merge of {n} layers, nothing copied"
+msgstr "fusión de {n} capas, sin copiar nada"
+
+msgid "MkPFS finished with an error (code {code})."
+msgstr "MkPFS terminó con error (código {code})."
+
+msgid "ETA"
+msgstr "quedan"
+
+msgid "Done in {time}: "
+msgstr "Hecho en {time}: "
+
+msgid "Choose the game folder"
+msgstr "Elige la carpeta del juego"
+
+msgid "Choose where to save the container"
+msgstr "Elige dónde guardar el contenedor"
+
+msgid "Choose the temporary folder"
+msgstr "Elige la carpeta temporal"
+
+msgid "unrar is not installed: .rar sources cannot be read (install RAR from RARLAB, e.g. brew install --cask rar)."
+msgstr "unrar no está instalado: los .rar no se podrán leer (instala RAR de RARLAB, p. ej. brew install --cask rar)."
+
+msgid "unrar is not installed: .rar sources cannot be read (sudo apt install unrar)."
+msgstr "unrar no está instalado: los .rar no se podrán leer (sudo apt install unrar)."
+
+msgid "Password-protected archives ({n}): type the password above (applies to all) or in each card."
+msgstr "Hay archivos con contraseña ({n}): escríbela arriba (vale para todos) o en la tarjeta de cada uno."
+
+msgid "No game here: looking for folders with <tt>eboot.bin</tt> and <tt>sce_sys/param.json</tt>."
+msgstr "No hay ningún juego aquí: busco carpetas con <tt>eboot.bin</tt> y <tt>sce_sys/param.json</tt>."
+
+msgid "Tick the ones you want to pack:"
+msgstr "Marca los que quieras comprimir:"
+
+msgid "{name} seems to belong to another game ({other}, not {this}).\n\nAdd it anyway?"
+msgstr "{name} parece de otro juego ({other}, no {this}).\n\n¿Añadirlo igualmente?"
+
+msgid "It may not fit: {free} free and the game takes {size}."
+msgstr "Puede que no quepa: hay {free} libres y el juego ocupa {size}."
+
+msgid "Source and destination are on the same disk ({disk}): reading and writing at once makes it slower."
+msgstr "Origen y destino están en el mismo disco ({disk}): leer y escribir a la vez lo hace más lento."
+
+msgid "The two-pass method needs {size} free in the temporary folder ({temp}) and there is {free}."
+msgstr "El método de dos pasadas necesita {size} libres en la carpeta temporal ({temp}) y hay {free}."
+
+msgid "level {n}"
+msgstr "nivel {n}"
+
+msgid "Could not start MkPFS: {error}"
+msgstr "No se pudo lanzar MkPFS: {error}"
+
+msgid "Wrong password (or encrypted archive without a password): MkPFS could not read the archive."
+msgstr "Contraseña incorrecta (o archivo cifrado sin contraseña): MkPFS no pudo leer el archivo."
+
+msgid "merge of {n} layers"
+msgstr "fusión de {n} capas"
+
+msgid "These files already exist and will be overwritten:"
+msgstr "Ya existen estos archivos y se sobrescribirán:"
+
+msgid "Failure: {error}"
+msgstr "Fallo: {error}"
+
+msgid "{n} games found."
+msgstr "{n} juegos encontrados."

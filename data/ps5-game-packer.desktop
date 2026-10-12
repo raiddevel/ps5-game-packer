@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=PS5 Game Packer
+Name[es]=Comprimir juegos PS5
+GenericName=PS5 game container builder
+GenericName[es]=Creador de contenedores de juegos PS5
+Comment=Pack a PS5 game folder or RAR/ZIP (plus updates and DLC) into a .ffpfsc container for ShadowMountPlus
+Comment[es]=Carpeta o RAR/ZIP de juego PS5 (más actualizaciones y DLC) a contenedor .ffpfsc para ShadowMountPlus
+Exec=ps5-game-packer
+Icon=ps5-game-packer
+Terminal=false
+Categories=Utility;Game;
+Keywords=PS5;MkPFS;ffpfsc;PFS;ShadowMountPlus;packer;
+Keywords[es]=PS5;MkPFS;ffpfsc;PFS;ShadowMountPlus;comprimir;
+StartupNotify=true
