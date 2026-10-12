@@ -148,8 +148,9 @@ start-up and warns if the installed engine lacks something.
 
 MkPFS 1.1.0 packs folders. Two things this program needs are not in it yet, so the engine is installed from a fork,
 [raiddevel/MkPFS](https://github.com/raiddevel/MkPFS), branch `layered-source`. The fork keeps the GPL-3.0 license
-and the authorship of MkPFS; the changes are small, come with tests and are proposed to MkPFS as pull requests, to
-drop them from here once an official release includes them. There are three branches:
+and the authorship of MkPFS; the changes are small, come with tests and are proposed to MkPFS as pull requests (issue [#138](https://github.com/PSBrew/MkPFS/issues/138);
+pull requests [#139](https://github.com/PSBrew/MkPFS/pull/139), [#140](https://github.com/PSBrew/MkPFS/pull/140) and [#141](https://github.com/PSBrew/MkPFS/pull/141)), to drop them from here once an official release
+includes them. There are three branches:
 
 - `archive-source`: pack a game straight from its RAR or ZIP, without extracting it. `mkpfs pack folder` accepts a
   `.rar` or `.zip` as source, lists the archive once, finds the game folder inside and streams each member to the
@@ -158,14 +159,14 @@ drop them from here once an official release includes them. There are three bran
   batch` and the APR-EMU index; AES-encrypted ZIPs need the `mkpfs[archives]` extra. RAR archives are read through
   the `unrar` tool. A second commit fixes the RAR listing: multi-volume sets are listed with `unrar lt -v`, names are
   passed to UnRAR.exe with backslashes on Windows and the `Service` headers of newer UnRAR versions are skipped. New
-  module `mkpfs/archive_source.py` plus the hooks in the CLI, the exFAT writer and the AMPR index.
+  module `mkpfs/archive_source.py` plus the hooks in the CLI, the exFAT writer and the AMPR index. Pull request [#139](https://github.com/PSBrew/MkPFS/pull/139).
 - `layered-source`, on top of the previous one: merge updates and DLC while packing, without copying. `--layer PATH`,
   repeatable from bottom to top (`PATH::FOLDER` picks the game folder inside). Each layer is a folder or a RAR/ZIP;
   a file in a higher layer replaces the same one below and the result is streamed to the container, byte for byte
   the same as the folder merged by hand. New module `mkpfs/layered_source.py` and a small `SourceTree` interface
-  shared by archives and layers. This is the branch the program uses.
+  shared by archives and layers. This is the branch the program uses. Pull request [#141](https://github.com/PSBrew/MkPFS/pull/141).
 - `archive-source-gui`, on top of the first one: MkPFS's own window accepts archives too. This program does not use
-  it.
+  it. Pull request [#140](https://github.com/PSBrew/MkPFS/pull/140).
 
 All three pass the MkPFS test suite and `ruff`.
 

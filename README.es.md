@@ -148,7 +148,8 @@ versión oficial incluya la lectura de archivos y las capas, bastará cambiar el
 MkPFS 1.1.0 empaqueta carpetas. Dos cosas que este programa necesita no están todavía en él, así que el motor se
 instala desde un fork, [raiddevel/MkPFS](https://github.com/raiddevel/MkPFS), rama `layered-source`. El fork
 conserva la licencia GPL-3.0 y la autoría de MkPFS; los cambios son pequeños, llevan pruebas y están propuestos a
-MkPFS como pull requests, para quitarlos de aquí cuando una versión oficial los incluya. Son tres ramas:
+MkPFS como pull requests (issue [#138](https://github.com/PSBrew/MkPFS/issues/138); pull requests [#139](https://github.com/PSBrew/MkPFS/pull/139), [#140](https://github.com/PSBrew/MkPFS/pull/140) y [#141](https://github.com/PSBrew/MkPFS/pull/141)), para
+quitarlos de aquí cuando una versión oficial los incluya. Son tres ramas:
 
 - `archive-source`: empaquetar un juego directamente desde su RAR o ZIP, sin extraerlo. `mkpfs pack folder` acepta
   un `.rar` o `.zip` como origen, lista el archivo una vez, localiza la carpeta del juego dentro y envía cada
@@ -158,14 +159,14 @@ MkPFS como pull requests, para quitarlos de aquí cuando una versión oficial lo
   con la herramienta `unrar`. Un segundo commit arregla el listado de RAR: los conjuntos por partes se listan con
   `unrar lt -v`, los nombres se pasan a UnRAR.exe con barras invertidas en Windows y se saltan las cabeceras
   `Service` de los UnRAR nuevos. Módulo nuevo `mkpfs/archive_source.py` más los enganches en la CLI, el escritor
-  exFAT y el índice AMPR.
+  exFAT y el índice AMPR. Pull request [#139](https://github.com/PSBrew/MkPFS/pull/139).
 - `layered-source`, sobre la anterior: fusionar actualizaciones y DLC al empaquetar, sin copiar. `--layer RUTA`,
   repetible de abajo arriba (`RUTA::CARPETA` elige la carpeta del juego dentro). Cada capa es una carpeta o un
   RAR/ZIP; un archivo de una capa superior sustituye al mismo de abajo y el resultado se envía en flujo al
   contenedor, byte a byte igual que la carpeta fusionada a mano. Módulo nuevo `mkpfs/layered_source.py` y una
-  pequeña interfaz `SourceTree` común a archivos y capas. Es la rama que usa este programa.
+  pequeña interfaz `SourceTree` común a archivos y capas. Es la rama que usa este programa. Pull request [#141](https://github.com/PSBrew/MkPFS/pull/141).
 - `archive-source-gui`, sobre la primera: la ventana propia de MkPFS también acepta archivos. Este programa no la
-  usa.
+  usa. Pull request [#140](https://github.com/PSBrew/MkPFS/pull/140).
 
 Las tres pasan la batería de pruebas de MkPFS y `ruff`.
 
