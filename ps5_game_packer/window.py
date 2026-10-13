@@ -142,7 +142,7 @@ class Window(ctk.CTk):
         self.quit_when_done = bool(auto and auto.get("quit"))
         self._scan_id = 0
         self._source_timer: str | None = None
-        self._password_timer: str | None = None
+        self._scanned_password = ""  # the general password used by the last scan
         self._loading = True
         self._scanning = False
         self.exit_code = 0
@@ -173,7 +173,6 @@ class Window(ctk.CTk):
         self._manual_ticks: dict[str, bool] = {}
         self._kept_params: dict[str, dict] = {}
         self._password_focus: str | None = None
-        self._card_timer: str | None = None
         self._scanned_text = ""
         self.bold_font = ctk.CTkFont(weight="bold")
         self.small_font = ctk.CTkFont(size=11)
@@ -267,7 +266,8 @@ class Window(ctk.CTk):
         # Password (archives only)
         self.l_password = self._label(grid, _("Password:"))
         self.e_password = ctk.CTkEntry(grid, show="•", placeholder_text=_("Only if the archive asks for one (in batches it applies to every archive; each card can have its own)"))
-        self.e_password.bind("<KeyRelease>", self._password_changed)
+        self.e_password.bind("<Return>", lambda _e: self._rescan_for_password())
+        self.e_password.bind("<FocusOut>", lambda _e: self._rescan_for_password())
         self.c_show_password = ctk.CTkCheckBox(grid, text=_("Show"), command=self._toggle_show_password)
         self.l_password.grid(row=1, column=0, sticky="e", padx=(0, 8), pady=4)
         self.e_password.grid(row=1, column=1, sticky="ew", pady=4)
@@ -527,27 +527,20 @@ class Window(ctk.CTk):
             self.after_cancel(self._source_timer)
         self._source_timer = self.after(600, self._source_changed)
 
-    def _password_changed(self, _e=None) -> None:
-        if self._password_timer is not None:
-            self.after_cancel(self._password_timer)
-        self._password_timer = self.after(700, self._rescan_for_password)
-
     def _rescan_for_password(self) -> None:
-        self._password_timer = None
+        """Rescans with the general password once it is typed (Enter, or leaving the field), if it changed."""
+        if self.e_password.get() == self._scanned_password:
+            return
         text = self._get_text(self.e_source)
         if text and (is_archive(Path(text)) or Path(text).is_dir()):
             self._source_changed()
 
-    def _card_password_typed(self, path: str, entry: ctk.CTkEntry) -> None:
-        if self._card_timer is not None:
-            self.after_cancel(self._card_timer)
-        self._card_timer = self.after(700, lambda: self._card_password_changed(path, entry))
-
     def _card_password_changed(self, path: str, entry: ctk.CTkEntry) -> None:
-        self._card_timer = None
         try:
             text = entry.get()
-        except tk.TclError:
+        except tk.TclError:  # the card was already rebuilt
+            return
+        if text == self.passwords.get(path, ""):
             return
         if text:
             self.passwords[path] = text
@@ -591,6 +584,7 @@ class Window(ctk.CTk):
             self._manual_ticks = {}
             self._drop_kept_params()
         self._scanned_text = text
+        self._scanned_password = self.e_password.get()
         self._keep_params(self.games)
         self.games = []
         self.pending = []
@@ -718,7 +712,7 @@ class Window(ctk.CTk):
             row += 1
         for note in notes or []:
             ctk.CTkLabel(self.scan_box, text=note, anchor="w", justify="left", wraplength=TEXT_WIDTH,
-                         font=self.small_font, text_color=COLOR_WARNING).grid(row=row, column=0, sticky="ew", padx=4)
+                         text_color=COLOR_WARNING).grid(row=row, column=0, sticky="ew", padx=4, pady=2)
             row += 1
         focus = self._password_cards.get(self._password_focus or "")
         self._password_focus = None
@@ -814,8 +808,8 @@ class Window(ctk.CTk):
         if self.passwords.get(path):
             entry.insert(0, self.passwords[path])
         entry.grid(row=1, column=1, sticky="ew", padx=(0, 8), pady=(2, 6))
-        entry.bind("<KeyRelease>", lambda _e, r=path, en=entry: self._card_password_typed(r, en))
         entry.bind("<Return>", lambda _e, r=path, en=entry: self._card_password_changed(r, en))
+        entry.bind("<FocusOut>", lambda _e, r=path, en=entry: self._card_password_changed(r, en))
         self._password_cards[path] = entry
         return frame
 
@@ -1434,7 +1428,7 @@ class Window(ctk.CTk):
 
     def destroy(self) -> None:
         """Cancels the own timers before closing (avoids Tk warnings)."""
-        for attribute in ("_pump_id", "_source_timer", "_password_timer", "_card_timer"):
+        for attribute in ("_pump_id", "_source_timer"):
             ident = getattr(self, attribute, None)
             if ident is not None:
                 try:
