@@ -70,6 +70,9 @@ msgstr "No se pudo abrir el ZIP: {detail}"
 msgid "Cannot find the MkPFS engine at {path}."
 msgstr "No encuentro el motor MkPFS en {path}."
 
+msgid "{item}: this is a PKG, not a game dump ({pkgs}). There is nothing to pack: install it on the console with the Package Installer (Debug Settings)."
+msgstr "{item}: esto es un PKG, no un volcado del juego ({pkgs}). No hay nada que comprimir: instálalo en la consola con el Package Installer (Debug Settings)."
+
 msgid "Kept aside (not merged; install them later with the Package Installer): {items}"
 msgstr "Aparte (no se fusionan; van por el Package Installer después): {items}"
 

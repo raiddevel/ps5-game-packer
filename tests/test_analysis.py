@@ -488,3 +488,25 @@ def test_bare_param_zip_file_and_folder(tmp_path):
     (bad / "param.json").write_bytes(sg.BROKEN_PARAM_BYTES)
     jobs, notes = analyze_folder(bad, "")
     assert len(jobs) == 1 and jobs[0]["param"] == PARAM_MISSING and any("not a valid param.json" in n for n in notes)
+
+
+def test_pkg_is_not_a_dump(tmp_path):
+    # an archive or a folder with .pkg files and no eboot.bin is a package: a note, not a game or a layer
+    import zipfile
+    games = tmp_path / "games"
+    games.mkdir()
+    with zipfile.ZipFile(games / f"Game.{sg.TITLE_ID}.zip", "w") as zf:
+        zf.writestr(f"Game/{sg.TITLE_ID}-Compressed/EP0102-{sg.TITLE_ID}_00-SAMPLE00000000000.pkg", b"\x7fCNT" + b"\0" * 64)
+    jobs, notes = analyze_folder(games, "")
+    assert jobs == [] and len(notes) == 1 and "this is a PKG" in notes[0] and "Package Installer" in notes[0]
+    assert f"EP0102-{sg.TITLE_ID}_00-SAMPLE00000000000.pkg" in notes[0]
+    folder = tmp_path / "folder"
+    pkg = folder / f"Game.{sg.TITLE_ID}" / f"{sg.TITLE_ID}-Compressed" / "game.pkg"
+    pkg.parent.mkdir(parents=True)
+    pkg.write_bytes(b"\x7fCNT" + b"\0" * 64)
+    jobs, notes = analyze_folder(folder, "")
+    assert jobs == [] and len(notes) == 1 and "this is a PKG" in notes[0] and f"{sg.TITLE_ID}-Compressed/game.pkg" in notes[0]
+    # next to a real game of the same ID it is still not a layer
+    sg.make_base(folder / f"Dump.{sg.TITLE_ID}")
+    jobs, notes = analyze_folder(folder, "")
+    assert len(jobs) == 1 and not jobs[0].get("layers") and any("this is a PKG" in n for n in notes)

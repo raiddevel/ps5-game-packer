@@ -9,6 +9,10 @@
   and the "Pack" button stay visible on small screens even with many games.
 - A DLC, update or backport that brings its own `eboot.bin` but no `param.json` is never taken as the base game:
   alone, it is reported as missing its base; next to the base, it is a layer.
+- A RAR/ZIP or folder that holds `.pkg` files and no `eboot.bin` is reported as what it is, a package to install
+  on the console with the Package Installer, instead of "the base game is missing".
+- The password fields no longer rescan on every keystroke (the list flickered while typing): only on Enter or
+  when leaving the field, and only if the password changed. Notes under the list are in normal size.
 - The screenshot tool no longer touches the real settings.
 
 ## 2.1.3 - 2026-10-13

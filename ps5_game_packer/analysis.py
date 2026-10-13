@@ -375,6 +375,10 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
                         "ampr": False, "ampr_index": False, "item": n}
             notes.append(f"{n}: {error_text(info)}")
             return None
+        if info.get("pkgs") and not info.get("eboots"):  # a package, not a dump: nothing to pack
+            notes.append(_("{item}: this is a PKG, not a game dump ({pkgs}). There is nothing to pack: install it on the "
+                           "console with the Package Installer (Debug Settings).").format(item=n, pkgs=", ".join(info["pkgs"])))
+            return None
         bare = info.get("bare_param")
         if bare:  # an archive with nothing but a param.json
             if bare.get("state") != PARAM_OK:
@@ -412,7 +416,12 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
     if not item.is_dir():
         return None
     try:
-        pkgs += [f"{n} → {q.relative_to(item)}" for q in item.rglob("*.pkg")]
+        inside = sorted(q.relative_to(item).as_posix() for q in item.rglob("*.pkg"))
+        if inside and not any(item.rglob("eboot.bin")):  # a package, not a dump: nothing to pack
+            notes.append(_("{item}: this is a PKG, not a game dump ({pkgs}). There is nothing to pack: install it on the "
+                           "console with the Package Installer (Debug Settings).").format(item=n, pkgs=", ".join(inside)))
+            return None
+        pkgs += [f"{n} → {q}" for q in inside]
     except OSError:
         pass
     games = find_games(item, limit=1)
