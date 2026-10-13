@@ -25,7 +25,7 @@ def _open(window, auto: dict):
         try:
             return window.Window(auto)
         except tk.TclError as e:
-            if "init.tcl" not in str(e) or attempt == 2:
+            if not ("init.tcl" in str(e) or "tk.tcl" in str(e)) or attempt == 2:
                 raise
             time.sleep(1.0)
     raise AssertionError("unreachable")
