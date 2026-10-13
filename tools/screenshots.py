@@ -27,6 +27,12 @@ from PIL import ImageGrab  # noqa: E402
 import synthetic_game as sg  # noqa: E402
 from ps5_game_packer import environment, i18n  # noqa: E402
 
+# never touch the real settings, cache or log: the demo pack would overwrite the user's destination
+_TMP = Path(tempfile.mkdtemp(prefix="ps5-game-packer-shots-"))
+environment.CONFIG_DIR = _TMP / "config"
+environment.CONFIG_FILE = environment.CONFIG_DIR / "config.json"
+environment.CACHE_DIR = _TMP / "cache"
+
 GEOMETRY = "1000x860+40+20"
 
 
