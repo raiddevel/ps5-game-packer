@@ -1,5 +1,10 @@
 # Changes
 
+## Unreleased
+
+- A folder or RAR/ZIP holding only a `sce_sys/param.json`, next to a single game whose own `param.json` cannot be
+  read, is attached to that game automatically, even when only the archive name carries the TITLE_ID.
+
 ## 2.1.3 - 2026-10-13
 
 - A RAR/ZIP whose name carries no TITLE_ID and whose `sce_sys/param.json` is broken or missing was silently dropped

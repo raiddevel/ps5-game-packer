@@ -386,11 +386,12 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
                     "ampr_index": bool(g.get("ampr_index")), "param": g.get("param_state", PARAM_OK)}
         candidates = info.get("candidate_roots") or []
         sub = candidates[0] if candidates else info.get("single_root", "")
-        m = ID_RE.search(n) or ID_RE.search(sub)
         pinfo = (info.get("params") or {}).get(sub) or {}  # the param.json of a layer (DLC/update without eboot), if any
         param = pinfo.get("param") or {}
+        m = ID_RE.search(n) or ID_RE.search(sub) or ID_RE.search(title_id_of(param))
         return {**common, "subpath": sub, "complete": False,
                 "title_id": m.group(1).upper() if m else "", "name": game_title(param),
+                "param_only": int(info.get("files", 0)) == 1 and pinfo.get("state") == PARAM_OK,
                 "version": str(param.get("contentVersion") or ""), "req_fw": str(param.get("requiredSystemSoftwareVersion") or ""),
                 "has_eboot": ((sub + "/") if sub else "") + "eboot.bin" in set(info.get("eboots", [])),
                 "files": int(info.get("files", 0)), "bytes": int(info.get("bytes", 0)),
@@ -420,7 +421,8 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
             "req_fw": str(param.get("requiredSystemSoftwareVersion") or ""),
             "has_eboot": (root / "eboot.bin").is_file(),
             "files": files, "bytes": size, "ampr": (root / "fakelib" / "libSceAmpr.sprx").is_file(),
-            "ampr_index": (root / "ampr_emu.index").is_file(), "item": n, "param": state}
+            "ampr_index": (root / "ampr_emu.index").is_file(), "item": n, "param": state,
+            "param_only": files == 1 and state == PARAM_OK}
 
 
 def archives_in_folder(folder: Path, depth: int = ARCHIVE_DEPTH) -> list[Path]:
@@ -585,6 +587,12 @@ def group_layers(items: list[dict], notes: list[str]) -> list[dict]:
     for it in items:
         (groups.setdefault(it["title_id"], []) if it["title_id"] else no_id).append(it)
     with_base = [k for k, v in groups.items() if any(i["complete"] for i in v)]
+    # A lone param.json (folder or archive) carrying a TITLE_ID, next to a single game whose own param.json cannot
+    # be read (so its ID is a stand-in): assume it is the fix for that game and put it on top.
+    stand_in = [k for k in with_base if not ID_RE.fullmatch(k)]
+    if len(stand_in) == 1:
+        for k in [k for k, v in groups.items() if k not in with_base and all(i.get("param_only") for i in v)]:
+            groups[stand_in[0]] += groups.pop(k)
     if no_id:
         if len(with_base) == 1:
             groups[with_base[0]] += no_id

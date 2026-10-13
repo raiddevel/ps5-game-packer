@@ -412,3 +412,28 @@ def test_archive_without_id_and_broken_param(tmp_path):
         assert j["param"] == PARAM_OK and j["title_id"] == sg.TITLE_ID and container_name(j) == f"Sample Game [{sg.TITLE_ID}].ffpfsc"
     finally:
         delete_temp_layer(it)
+
+
+def test_lone_param_joins_unreadable_game(tmp_path):
+    # game folder without a readable param.json (and no ID in its name) + a ZIP holding only the right param.json
+    games = tmp_path / "games"
+    sg.make_base(games / "Requiem", param="broken")
+    sg.pack_zip(games / f"param-{sg.TITLE_ID}.zip", sg.make_loose_param(tmp_path / "work" / "p", version="01.020.000"))
+    jobs, notes = analyze_folder(games, "")
+    assert len(jobs) == 1 and not notes, notes
+    j = jobs[0]
+    assert [c["role"] for c in j["layers"]][0] == ROLE_BASE and len(j["layers"]) == 2 and j["layers"][1]["param_only"]
+    assert j["param"] == PARAM_OK and j["title_id"] == sg.TITLE_ID and j["name"] == "Sample Game" and j["version"] == "01.020.000"
+    assert final_eboot(j)["role"] == ROLE_BASE and container_name(j) == f"Sample Game [{sg.TITLE_ID}].ffpfsc"
+    # the same with the param.json in a folder named after the ID
+    other = tmp_path / "other"
+    sg.make_base(other / "Requiem", param="missing")
+    sg.make_loose_param(other / f"{sg.TITLE_ID}-param")
+    jobs, notes = analyze_folder(other, "")
+    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_OK and jobs[0]["title_id"] == sg.TITLE_ID, notes
+    # a real DLC (not just a param.json) of another ID is still kept apart with a note
+    dlc = tmp_path / "dlc-case"
+    sg.make_base(dlc / "Requiem", param="broken")
+    sg.make_dlc_zip(dlc / "Other.Game.DLC.PPSA11111.zip", inner_folder="PPSA11111-app")
+    jobs, notes = analyze_folder(dlc, "")
+    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_BROKEN and any("base game is missing" in n for n in notes)
