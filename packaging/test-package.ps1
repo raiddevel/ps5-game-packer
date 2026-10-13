@@ -4,7 +4,7 @@
 # case with ps5-game-packer.exe --auto, unpacks with mkpfs.exe --deep and compares byte by byte (SHA-256) with
 # what is expected.
 #
-#   powershell -ExecutionPolicy Bypass -File packaging\test-package.ps1 -Zip dist\ps5-game-packer-2.1.3-windows-x64.zip
+#   powershell -ExecutionPolicy Bypass -File packaging\test-package.ps1 -Zip dist\ps5-game-packer-2.1.4-windows-x64.zip
 #
 # Parameters: -Zip <zip> (required)  -Folder <test folder> (default %TEMP%\ps5-game-packer-test)
 #             -Python <python.exe> (creates the synthetic game; default "python")

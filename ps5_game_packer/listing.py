@@ -128,9 +128,22 @@ def summary(archive: Path, password: str = "") -> dict:
             if d not in params:
                 state, param = _param_of(source.subtree(d))
                 params[d] = {"state": state, "param": param}
+    # An archive holding nothing but a param.json (outside sce_sys): the fix people download for a broken game.
+    bare_param = None
+    loose = [p for p in paths if p.rsplit("/", 1)[-1] == "param.json" and not p.endswith("sce_sys/param.json")]
+    if len(paths) == 1 and len(loose) == 1:
+        folder, _sep, name = loose[0].rpartition("/")
+        try:
+            text = source.subtree(folder).read_bytes(name, limit=4 * 1024 * 1024).decode("utf-8-sig")
+            data = json.loads(text)
+            ok = isinstance(data, dict) and bool(str(data.get("titleId") or data.get("title_id") or "").strip())
+            bare_param = {"path": loose[0], "state": PARAM_OK if ok else PARAM_BROKEN, "param": data if ok else {}, "text": text}
+        except Exception:
+            bare_param = {"path": loose[0], "state": PARAM_BROKEN, "param": {}, "text": ""}
     return {
         "ok": True,
         "archive": str(archive),
+        "bare_param": bare_param,
         "kind": source.kind,
         "encrypted": bool(source.encrypted),
         "solid": bool(source.solid),

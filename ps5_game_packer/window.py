@@ -281,7 +281,8 @@ class Window(ctk.CTk):
         self.l_scan = ctk.CTkLabel(self.scan_frame, text=_("Choose a folder or an archive to scan it."),
                                    anchor="w", justify="left", wraplength=TEXT_WIDTH)
         self.l_scan.grid(row=0, column=0, sticky="ew", padx=8, pady=(6, 2))
-        self.scan_box = ctk.CTkFrame(self.scan_frame, fg_color="transparent")
+        # the list of games grows with its contents up to a share of the screen, then it scrolls
+        self.scan_box = ctk.CTkScrollableFrame(self.scan_frame, fg_color="transparent", height=1)
         self.scan_box.grid(row=1, column=0, sticky="ew", padx=4, pady=(0, 4))
         self.scan_box.grid_columnconfigure(0, weight=1)
 
@@ -567,6 +568,18 @@ class Window(ctk.CTk):
             child.destroy()
         self.checks = []
         self._password_cards = {}
+        self._fit_scan_box()
+
+    def _fit_scan_box(self) -> None:
+        """Sizes the list to its contents, up to 40 % of the screen; past that it scrolls."""
+        try:
+            self.update_idletasks()
+            scale = self.scan_box._get_widget_scaling()
+            need = sum(c.winfo_reqheight() + 4 for c in self.scan_box.winfo_children()) / scale
+            cap = max(160, int(self.winfo_screenheight() * 0.4 / scale))
+            self.scan_box.configure(height=max(1, min(int(need), cap)))
+        except tk.TclError:
+            pass
 
     def _source_changed(self, *_a) -> None:
         self._source_timer = None
@@ -719,6 +732,7 @@ class Window(ctk.CTk):
             self.settings["last_source"] = str(path.parent)
         else:
             self.settings["last_source"] = str(path.parent if len(games) == 1 and games[0]["path"] == path else path)
+        self._fit_scan_box()
         self._update_warnings()
 
     @staticmethod
@@ -900,6 +914,7 @@ class Window(ctk.CTk):
         analysis.recompute_totals(job)
         self._draw_layers(job, frame)
         self._refresh_description(job)
+        self._fit_scan_box()
         self._update_warnings()
 
     def _add_param(self, job: dict, frame: ctk.CTkFrame) -> None:

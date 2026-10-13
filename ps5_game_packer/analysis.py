@@ -3,6 +3,7 @@
 """Scanning folders and archives: games, layers (update, backport, DLC) and warnings. Pure logic, no window."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -354,6 +355,12 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
         if n.lower().endswith(".pkg"):
             pkgs.append(n)
             return None
+        if n.lower() == "param.json":  # a loose param.json next to the games: the fix for a broken one
+            state, param = validate_param_file(item)
+            if state != PARAM_OK:
+                notes.append(_("{name} is not a valid param.json: it has to be a JSON object with titleId.").format(name=n))
+                return None
+            return bare_param_layer(item, item.read_bytes().decode("utf-8-sig", errors="replace"), param)
         if not (is_archive(item) and is_first_volume(item)):
             return None
         item_password = password_for(item, password, passwords)
@@ -368,6 +375,12 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
                         "ampr": False, "ampr_index": False, "item": n}
             notes.append(f"{n}: {error_text(info)}")
             return None
+        bare = info.get("bare_param")
+        if bare:  # an archive with nothing but a param.json
+            if bare.get("state") != PARAM_OK:
+                notes.append(_("{name} is not a valid param.json: it has to be a JSON object with titleId.").format(name=n))
+                return None
+            return bare_param_layer(item, bare["text"], bare["param"])
         pkgs += [f"{n} → {q}" for q in info.get("pkgs", [])]
         encrypted = bool(info.get("encrypted"))
         common = {"path": item, "virtual": True, "item": n, "encrypted": encrypted, "password": item_password if encrypted else ""}
@@ -413,6 +426,8 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
     files, size = measure_folder(root)
     if files == 0:
         return None
+    if files == 1 and (root / "param.json").is_file():  # a folder with nothing but a loose param.json
+        return analyze_item(root / "param.json", password, pkgs, notes, passwords)
     state, param = param_state(root)
     m = ID_RE.search(title_id_of(param)) or ID_RE.search(n) or ID_RE.search(root.name)
     return {"path": root, "virtual": False, "subpath": "", "complete": False,
@@ -602,7 +617,10 @@ def group_layers(items: list[dict], notes: list[str]) -> list[dict]:
             notes.append(_("Ignored (cannot tell which game they belong to): {items}").format(items=", ".join(i["item"] for i in no_id)))
     jobs: list[dict] = []
     for tid, group in groups.items():
-        complete = [i for i in group if i["complete"]]
+        # An eboot.bin without param.json whose name says DLC, update or backport is a layer, never the base
+        # (a DLC with its own executable, packed alone, would give a container the console cannot run).
+        complete = [i for i in group if i["complete"] and not (
+            i.get("param", PARAM_OK) == PARAM_MISSING and (DLC_RE.search(i["item"]) or UPDATE_RE.search(i["item"]) or BACKPORT_RE.search(i["item"])))]
         if not complete:
             notes.append(_("{tid}: only an update/DLC was found ({items}); the base game is missing.")
                          .format(tid=tid, items=", ".join(i["item"] for i in group)))
@@ -727,6 +745,22 @@ def param_json_layer(file: Path, param: dict) -> dict:
             "files": 1, "bytes": size, "ampr": False, "ampr_index": False, "param": PARAM_OK,
             "item": f"{file.parent.name}/{file.name}" if file.parent.name else file.name,
             "temporary": True, "param_source": str(file)}
+
+
+def bare_param_layer(source: Path, text: str, param: dict) -> dict:
+    """A param.json found on its own (a loose file, or alone inside an archive or folder) becomes a layer like
+    `param_json_layer`. The cache folder is named after the ID and the source, so a rescan lands on the same one."""
+    tid = title_id_of(param)
+    tag = hashlib.sha1(str(source).encode("utf-8")).hexdigest()[:8]
+    folder = environment.CACHE_DIR / f"param-{clean_name(tid, 40) or 'game'}-{tag}"
+    (folder / "sce_sys").mkdir(parents=True, exist_ok=True)
+    (folder / "sce_sys" / "param.json").write_text(text, encoding="utf-8")
+    size = (folder / "sce_sys" / "param.json").stat().st_size
+    return {"path": folder, "virtual": False, "subpath": "", "complete": False, "title_id": tid,
+            "name": game_title(param), "version": str(param.get("contentVersion") or ""),
+            "req_fw": str(param.get("requiredSystemSoftwareVersion") or ""), "has_eboot": False,
+            "files": 1, "bytes": size, "ampr": False, "ampr_index": False, "param": PARAM_OK,
+            "item": source.name, "temporary": True, "param_only": True, "param_source": str(source)}
 
 
 def delete_temp_layer(layer: dict) -> None:

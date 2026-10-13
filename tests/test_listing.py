@@ -108,3 +108,23 @@ def test_listing_as_program(tmp_path):
     r = subprocess.run([str(py), str(environment.LISTING), str(z)], capture_output=True, text=True, env=env, timeout=120)
     assert r.returncode == 0, r.stderr
     assert json.loads(r.stdout)["single_root"] == f"{sg.TITLE_ID}-app"
+
+
+def test_list_bare_param(tmp_path):
+    # an archive with nothing but a loose param.json (no sce_sys/): reported apart, with its contents
+    z = tmp_path / "param.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.writestr("param.json", sg.param_json("02.013.000", "0x0900000000000000"))
+    info = _list(z)
+    assert info["ok"] and info["games"] == [] and info["bare_param"]["state"] == "ok"
+    assert info["bare_param"]["path"] == "param.json" and info["bare_param"]["param"]["titleId"] == sg.TITLE_ID
+    assert "02.013.000" in info["bare_param"]["text"]
+    z2 = tmp_path / "broken.zip"
+    with zipfile.ZipFile(z2, "w") as zf:
+        zf.writestr("stuff/param.json", sg.BROKEN_PARAM_BYTES)
+    assert _list(z2)["bare_param"]["state"] == "broken"
+    z3 = tmp_path / "two.zip"
+    with zipfile.ZipFile(z3, "w") as zf:
+        zf.writestr("param.json", sg.param_json("01.000.000", "0x0900000000000000"))
+        zf.writestr("readme.txt", "x")
+    assert _list(z3)["bare_param"] is None  # more than one file: not a bare param.json

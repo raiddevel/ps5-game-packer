@@ -1,9 +1,15 @@
 # Changes
 
-## Unreleased
+## 2.1.4 - 2026-10-13
 
-- A folder or RAR/ZIP holding only a `sce_sys/param.json`, next to a single game whose own `param.json` cannot be
-  read, is attached to that game automatically, even when only the archive name carries the TITLE_ID.
+- A `param.json` on its own, as a loose file, alone inside a RAR/ZIP (even without the `sce_sys/` folder) or alone in
+  a folder, is picked up as the fix for the game whose `sce_sys/param.json` is broken or missing: it goes on top as
+  a layer, and the game takes its TITLE_ID, title and version.
+- The list of games grows only up to 40 % of the screen and then scrolls, so the password cards, the destination
+  and the "Pack" button stay visible on small screens even with many games.
+- A DLC, update or backport that brings its own `eboot.bin` but no `param.json` is never taken as the base game:
+  alone, it is reported as missing its base; next to the base, it is a layer.
+- The screenshot tool no longer touches the real settings.
 
 ## 2.1.3 - 2026-10-13
 

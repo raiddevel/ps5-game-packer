@@ -171,11 +171,19 @@ def test_duplicates_and_layers_without_base(tmp_path):
     sg.make_update(alone / f"Update.{sg.TITLE_ID}")
     jobs, notes = analyze_folder(alone, "")
     assert len(jobs) == 1 and jobs[0]["version"] == "01.050.000"
-    # a DLC without the base game cannot be packed
+    # a DLC without the base game cannot be packed, even when it brings its own eboot.bin (and no param.json)
     alone_dlc = tmp_path / "alone-dlc"
     sg.make_dlc_zip(alone_dlc / f"DLC.{sg.TITLE_ID}.zip")
     jobs, notes = analyze_folder(alone_dlc, "")
     assert jobs == [] and any("base game is missing" in n for n in notes)
+    with_eboot = tmp_path / "alone-dlc-eboot"
+    sg.make_dlc_zip(with_eboot / f"Game.DLC.Addon.{sg.TITLE_ID}.zip", with_eboot=True)
+    jobs, notes = analyze_folder(with_eboot, "")
+    assert jobs == [] and any("base game is missing" in n for n in notes)
+    # next to the base it is a DLC layer, not a second game
+    sg.make_base(with_eboot / f"Game.{sg.TITLE_ID}")
+    jobs, notes = analyze_folder(with_eboot, "")
+    assert len(jobs) == 1 and [c["role"] for c in jobs[0]["layers"]] == [ROLE_BASE, ROLE_DLC], notes
 
 
 def test_archives_in_subfolders(tmp_path):
@@ -437,3 +445,46 @@ def test_lone_param_joins_unreadable_game(tmp_path):
     sg.make_dlc_zip(dlc / "Other.Game.DLC.PPSA11111.zip", inner_folder="PPSA11111-app")
     jobs, notes = analyze_folder(dlc, "")
     assert len(jobs) == 1 and jobs[0]["param"] == PARAM_BROKEN and any("base game is missing" in n for n in notes)
+
+
+def test_bare_param_zip_file_and_folder(tmp_path):
+    # a param.zip with a loose param.json, a loose param.json file, or a folder with only one: all become the fix
+    import zipfile
+    games = tmp_path / "games"
+    sg.make_base(games / "Requiem", param="broken")
+    with zipfile.ZipFile(games / "param.zip", "w") as zf:
+        zf.writestr("param.json", sg.param_json("02.013.000", "0x0900000000000000"))
+    jobs, notes = analyze_folder(games, "")
+    assert len(jobs) == 1 and not notes, notes
+    j = jobs[0]
+    layer = j["layers"][1]
+    assert j["param"] == PARAM_OK and j["title_id"] == sg.TITLE_ID and j["version"] == "02.013.000"
+    assert layer["temporary"] and layer["param_only"] and layer["param_source"] == str(games / "param.zip")
+    assert layer["path"].parent == environment.CACHE_DIR and layer["path"].name.startswith(f"param-{sg.TITLE_ID}-")
+    assert (layer["path"] / "sce_sys" / "param.json").is_file()
+    # a rescan lands on the same cache folder (so the layers do not pile up)
+    again = analyze_folder(games, "")[0][0]["layers"][1]
+    assert again["path"] == layer["path"]
+    delete_temp_layer(layer)
+    assert not layer["path"].exists()
+    # loose file next to the game
+    loose = tmp_path / "loose"
+    sg.make_base(loose / "Requiem", param="missing")
+    (loose / "param.json").write_bytes(sg.param_json("01.000.000", "0x0900000000000000"))
+    jobs, notes = analyze_folder(loose, "")
+    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_OK and jobs[0]["layers"][1]["item"] == "param.json", notes
+    delete_temp_layer(jobs[0]["layers"][1])
+    # folder holding only a loose param.json
+    sub = tmp_path / "sub"
+    sg.make_base(sub / "Requiem", param="missing")
+    (sub / "para").mkdir()
+    (sub / "para" / "param.json").write_bytes(sg.param_json("01.000.000", "0x0900000000000000"))
+    jobs, notes = analyze_folder(sub, "")
+    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_OK and jobs[0]["layers"][1]["param_source"].endswith("para/param.json"), notes
+    delete_temp_layer(jobs[0]["layers"][1])
+    # a broken loose param.json is reported, not attached
+    bad = tmp_path / "bad"
+    sg.make_base(bad / "Requiem", param="missing")
+    (bad / "param.json").write_bytes(sg.BROKEN_PARAM_BYTES)
+    jobs, notes = analyze_folder(bad, "")
+    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_MISSING and any("not a valid param.json" in n for n in notes)

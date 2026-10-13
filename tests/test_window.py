@@ -423,3 +423,22 @@ def test_ticks_and_param_survive_rescan(tmp_path):
         assert not list(environment.CACHE_DIR.glob("param-PPSA99998*"))
     finally:
         w.destroy()
+
+
+def test_long_list_scrolls(tmp_path):
+    # many games: the list stops growing at 40 % of the screen and scrolls, so the buttons stay on screen
+    from ps5_game_packer import window
+    for i in range(8):  # eight different games (a different titleId inside each param.json)
+        root = tmp_path / "games" / f"Game{i}.PPSA9999{i}"
+        sg.make_base(root)
+        (root / "sce_sys" / "param.json").write_bytes(sg.param_json("01.000.000", "0x0900000000000000").replace(sg.TITLE_ID.encode(), f"PPSA9999{i}".encode()))
+    w = _open(window, {"source": str(tmp_path / "games"), "destination": str(tmp_path)})
+    try:
+        _spin(w, 30, until=lambda: len(w.games) == 8)
+        _spin(w, 0.5)
+        height = int(w.scan_box.cget("height"))
+        assert 100 < height <= int(w.winfo_screenheight() * 0.4 / w.scan_box._get_widget_scaling()) + 1
+        assert len(w.checks) == 8 and len(w.scan_box.winfo_children()) >= 16
+        assert w.b_pack.winfo_rooty() < w.winfo_screenheight()  # the Pack button is on screen
+    finally:
+        w.destroy()
