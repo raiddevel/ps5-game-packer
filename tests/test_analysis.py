@@ -480,7 +480,7 @@ def test_bare_param_zip_file_and_folder(tmp_path):
     (sub / "para").mkdir()
     (sub / "para" / "param.json").write_bytes(sg.param_json("01.000.000", "0x0900000000000000"))
     jobs, notes = analyze_folder(sub, "")
-    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_OK and jobs[0]["layers"][1]["param_source"].endswith("para/param.json"), notes
+    assert len(jobs) == 1 and jobs[0]["param"] == PARAM_OK and Path(jobs[0]["layers"][1]["param_source"]) == sub / "para" / "param.json", notes
     delete_temp_layer(jobs[0]["layers"][1])
     # a broken loose param.json is reported, not attached
     bad = tmp_path / "bad"
