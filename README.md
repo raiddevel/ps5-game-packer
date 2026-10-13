@@ -23,7 +23,7 @@ through a fork that adds archive reading and layers (see [Changes to MkPFS](#cha
 
 ## Installation
 
-On Windows, download `ps5-game-packer-2.1.2-windows-x64.zip` from the
+On Windows, download `ps5-game-packer-2.1.3-windows-x64.zip` from the
 [releases page](https://github.com/raiddevel/ps5-game-packer/releases), unzip it anywhere and open
 `ps5-game-packer.exe`. The first time, SmartScreen may say it protected your PC because the executable is not signed:
 "More info", then "Run anyway". If your antivirus complains about the program, which is built with PyInstaller, add

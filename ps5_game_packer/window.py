@@ -26,6 +26,7 @@ from .analysis import (
     PARAM_OK,
     ROLE_BASE,
     ROLE_LAYER,
+    archive_stem,
     container_name,
     final_eboot,
     fw_text,
@@ -168,8 +169,12 @@ class Window(ctk.CTk):
         self._scan_header = ""  # first line of the scan, to repaint the description
         # temporary layers from "Add param.json…", deleted when the batch ends
         self._pending_temporaries: list[dict] = []
+        # what survives a rescan of the same folder: the user's ticks and the added param.json layers, by job key
+        self._manual_ticks: dict[str, bool] = {}
+        self._kept_params: dict[str, dict] = {}
         self._password_focus: str | None = None
         self._card_timer: str | None = None
+        self._scanned_text = ""
         self.bold_font = ctk.CTkFont(weight="bold")
         self.small_font = ctk.CTkFont(size=11)
         self.title_font = ctk.CTkFont(size=18, weight="bold")
@@ -569,7 +574,11 @@ class Window(ctk.CTk):
         my_id = self._scan_id
         text = self._get_text(self.e_source)
         path = Path(text) if text else None
-        self._drop_temporaries(self.games)
+        if text != self._scanned_text:  # another folder: start clean
+            self._manual_ticks = {}
+            self._drop_kept_params()
+        self._scanned_text = text
+        self._keep_params(self.games)
         self.games = []
         self.pending = []
         self.archive_info = {}
@@ -630,7 +639,7 @@ class Window(ctk.CTk):
             m = analysis.ID_RE.search(archive.name) or analysis.ID_RE.search(g.get("subpath", ""))
             games.append({
                 "path": archive, "virtual": True, "subpath": g.get("subpath", ""),
-                "title_id": (g.get("title_id") or "").upper() or (m.group(1).upper() if m else archive.stem[:12]),
+                "title_id": (g.get("title_id") or "").upper() or (m.group(1).upper() if m else archive_stem(archive)),
                 "param": g.get("param_state", PARAM_OK),
                 "name": analysis.game_title(g.get("param") or {}) or g.get("name", ""),
                 "version": g.get("version", ""), "req_fw": g.get("req_fw", ""),
@@ -654,6 +663,11 @@ class Window(ctk.CTk):
         self._scanning = False
         self.pending = [g for g in games if g.get("needs_password")]
         games = [g for g in games if not g.get("needs_password")]
+        for g in games:
+            kept = self._kept_params.pop(self._job_key(g), None)
+            if kept is not None:  # the param.json added before the rescan goes back on top
+                analysis.add_layer(g, kept, role=ROLE_LAYER)
+        self._drop_kept_params()  # the ones whose game is no longer there
         self.games = games
         self._clear_box()
         if path.is_dir():
@@ -676,8 +690,10 @@ class Window(ctk.CTk):
             self.l_scan.configure(text=pre + _("{n} games found.").format(n=len(games)) + " " + _("Tick the ones you want to pack:"),
                                   text_color=("gray10", "gray90"))
             for g in games:
-                c = ctk.CTkCheckBox(self.scan_box, text=self._description(g), command=self._update_warnings)
-                if job_param_state(g) == PARAM_OK:  # without a valid param.json it stays unticked: the card says why
+                c = ctk.CTkCheckBox(self.scan_box, text=self._description(g))
+                c.configure(command=lambda c=c, g=g: self._game_toggled(c, g))
+                # without a valid param.json it stays unticked (the card says why); the user's own choice survives a rescan
+                if self._manual_ticks.get(self._job_key(g), job_param_state(g) == PARAM_OK):
                     c.select()
                 c.grid(row=row, column=0, sticky="w", padx=4, pady=2)
                 row += 1
@@ -704,6 +720,37 @@ class Window(ctk.CTk):
         else:
             self.settings["last_source"] = str(path.parent if len(games) == 1 and games[0]["path"] == path else path)
         self._update_warnings()
+
+    @staticmethod
+    def _job_key(job: dict) -> str:
+        return f"{job['path']}::{job.get('subpath', '')}"
+
+    def _game_toggled(self, check: ctk.CTkCheckBox, job: dict) -> None:
+        self._manual_ticks[self._job_key(job)] = bool(check.get())
+        self._update_warnings()
+
+    def _tick_game(self, job: dict) -> None:
+        """Ticks a game's checkbox (after its param.json has been fixed)."""
+        self._manual_ticks[self._job_key(job)] = True
+        for c, g in self.checks:
+            if g is job:
+                c.select()
+
+    def _keep_params(self, games: list[dict]) -> None:
+        """Before a rescan, sets aside the "Add param.json…" layers so they can go back on the same games."""
+        for g in games:
+            for c in g.get("layers", []):
+                if c.get("temporary"):
+                    self._kept_params[self._job_key(g)] = c
+
+    def _drop_kept_params(self) -> None:
+        layers = list(self._kept_params.values())
+        self._kept_params = {}
+        if self.running:  # a batch may still be packing from those folders: delete them when it ends
+            self._pending_temporaries += layers
+            return
+        for c in layers:
+            analysis.delete_temp_layer(c)
 
     @staticmethod
     def _description(job: dict) -> str:
@@ -881,6 +928,8 @@ class Window(ctk.CTk):
         analysis.add_layer(job, it, role=ROLE_LAYER)
         self._log(_("param.json added as a layer on top of {game}: {source}").format(game=job["title_id"], source=path) + "\n", "warning")
         self._layers_changed(job, frame)
+        if job_param_state(job) == PARAM_OK:
+            self._tick_game(job)
         return True
 
     def _drop_temporaries(self, games: list[dict], force: bool = False) -> None:
@@ -1380,6 +1429,7 @@ class Window(ctk.CTk):
                 setattr(self, attribute, None)
         try:
             self._drop_temporaries(getattr(self, "games", []), force=True)
+            self._drop_kept_params()
         except Exception:
             pass
         super().destroy()

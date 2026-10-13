@@ -381,3 +381,45 @@ def test_missing_param_alone(tmp_path):
         assert frame.winfo_children()[0].cget("text").startswith("⚠ sce_sys/param.json is missing: ShadowMountPlus will not be able to register")
     finally:
         w.destroy()
+
+
+def test_ticks_and_param_survive_rescan(tmp_path):
+    # unticking a game and fixing another with "Add param.json…" must survive a rescan of the same folder
+    from ps5_game_packer import analysis, environment, window
+    sg.make_base(tmp_path / "games" / f"Good.{sg.TITLE_ID}")
+    sg.make_base(tmp_path / "games" / "Broken.PPSA99998", param="broken")
+    good = tmp_path / "downloads" / "param.json"
+    good.parent.mkdir()
+    good.write_bytes(sg.param_json("01.020.000", "0x0900000000000000").replace(sg.TITLE_ID.encode(), b"PPSA99998"))
+    w = _open(window, {"source": str(tmp_path / "games"), "destination": str(tmp_path)})
+    try:
+        _spin(w, 20, until=lambda: len(w.games) == 2)
+        by_id = {g["title_id"]: g for g in w.games}
+        checks = {g["title_id"]: c for c, g in w.checks}
+        checks[sg.TITLE_ID].deselect()
+        w._game_toggled(checks[sg.TITLE_ID], by_id[sg.TITLE_ID])
+        children = w.scan_box.winfo_children()
+        broken_frame = children[children.index(checks["PPSA99998"]) + 1]
+        assert w._param_chosen(by_id["PPSA99998"], broken_frame, good)
+        assert checks["PPSA99998"].get() == 1  # fixed: ticked on its own
+        temporary = by_id["PPSA99998"]["layers"][1]["path"]
+        w._refresh_source()
+        _spin(w, 20, until=lambda: len(w.games) == 2 and w.games is not list(by_id.values()))
+        _spin(w, 0.5)
+        by_id = {g["title_id"]: g for g in w.games}
+        checks = {g["title_id"]: c for c, g in w.checks}
+        assert checks[sg.TITLE_ID].get() == 0  # the user's choice survived
+        assert checks["PPSA99998"].get() == 1
+        j = by_id["PPSA99998"]
+        assert [c["role"] for c in j["layers"]] == [analysis.ROLE_BASE, analysis.ROLE_LAYER] and j["param"] == analysis.PARAM_OK
+        assert j["layers"][1]["path"] == temporary and (temporary / "sce_sys" / "param.json").is_file()
+        assert [g["title_id"] for g in w._selected()] == ["PPSA99998"]
+        # another folder: ticks reset and the kept param.json layer is dropped with its folder
+        sg.make_base(tmp_path / "other" / f"Other.{sg.TITLE_ID}")
+        w._set_text(w.e_source, str(tmp_path / "other"))
+        w._source_changed()
+        _spin(w, 20, until=lambda: len(w.games) == 1 and w.games[0]["path"].name == f"Other.{sg.TITLE_ID}")
+        assert not temporary.exists() and not w._kept_params and not w._manual_ticks
+        assert not list(environment.CACHE_DIR.glob("param-PPSA99998*"))
+    finally:
+        w.destroy()

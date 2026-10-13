@@ -23,7 +23,7 @@ través de un fork que le añade la lectura de archivos y las capas (ver [Cambio
 
 ## Instalación
 
-En Windows, descarga `ps5-game-packer-2.1.2-windows-x64.zip` de la
+En Windows, descarga `ps5-game-packer-2.1.3-windows-x64.zip` de la
 [página de versiones](https://github.com/raiddevel/ps5-game-packer/releases), descomprímelo donde quieras y abre
 `ps5-game-packer.exe`. La primera vez SmartScreen puede decir que protegió el PC porque el ejecutable no está
 firmado: "Más información" y "Ejecutar de todas formas". Si tu antivirus se queja del programa, que está hecho con

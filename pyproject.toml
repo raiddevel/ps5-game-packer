@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ps5-game-packer"
-version = "2.1.2"
+version = "2.1.3"
 description = "Pack a PS5 game folder or RAR/ZIP (plus updates and DLC) into a .ffpfsc container for ShadowMountPlus. Windows and Linux; English and Spanish."
 readme = "README.md"
 license = "GPL-3.0-or-later"

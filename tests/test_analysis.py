@@ -389,3 +389,26 @@ def test_temporary_param_layer(tmp_path):
     delete_temp_layer({"path": foreign, "temporary": True})
     delete_temp_layer(dict(it, temporary=False))
     assert foreign.exists()
+
+
+def test_archive_without_id_and_broken_param(tmp_path):
+    # a RAR/ZIP whose name has no TITLE_ID and whose param.json is broken keeps the archive name as stand-in ID
+    assert analysis.archive_stem(Path("Some.Game.part1.rar")) == "Some.Game"
+    assert analysis.archive_stem(Path("Some.Game.r00")) == "Some.Game" and analysis.archive_stem(Path("x.zip")) == "x"
+    z = tmp_path / "games" / "Some.Game.zip"
+    sg.pack_zip(z, sg.make_base(tmp_path / "work" / "src", param="broken"), inner_folder="Some.Game-app")  # no ID anywhere
+    jobs, notes = analyze_folder(tmp_path / "games", "")
+    assert len(jobs) == 1 and not notes, notes
+    j = jobs[0]
+    assert j["virtual"] and j["complete"] and j["param"] == PARAM_BROKEN and j["title_id"] == "Some.Game"
+    assert container_name(j) == "Some.Game.ffpfsc" and param_warning(j).startswith("sce_sys/param.json cannot be read")
+    # the fix: a param.json layer on top gives it the real TITLE_ID and title
+    good = tmp_path / "downloads" / "param.json"
+    good.parent.mkdir()
+    good.write_bytes(sg.param_json("01.000.000", "0x0900000000000000"))
+    it = param_json_layer(good, validate_param_file(good)[1])
+    try:
+        assert add_layer(j, it, role=ROLE_LAYER) is None
+        assert j["param"] == PARAM_OK and j["title_id"] == sg.TITLE_ID and container_name(j) == f"Sample Game [{sg.TITLE_ID}].ffpfsc"
+    finally:
+        delete_temp_layer(it)

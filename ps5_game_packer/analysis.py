@@ -128,6 +128,12 @@ def is_archive(p: Path) -> bool:
     return p.is_file() and (n.endswith(environment.ARCHIVE_EXTENSIONS) or bool(re.search(r"\.r\d\d$", n)))
 
 
+def archive_stem(p: Path) -> str:
+    """Archive name without extension or volume number ("Game.part1.rar" -> "Game"), used as a stand-in TITLE_ID."""
+    stem = re.sub(r"\.(rar|zip|r\d\d)$", "", p.name, flags=re.IGNORECASE)
+    return re.sub(r"\.part\d+$", "", stem, flags=re.IGNORECASE) or p.name
+
+
 def game_title(param: dict) -> str:
     """Game title in the interface language, or whichever there is."""
     lp = param.get("localizedParameters") or {}
@@ -369,8 +375,10 @@ def analyze_item(item: Path, password: str, pkgs: list[str], notes: list[str], p
         if games:
             g = games[0]
             m = ID_RE.search(n) or ID_RE.search(g.get("subpath", ""))
+            # like folders (which fall back to the folder name), a game whose param.json is missing or broken
+            # keeps the archive name as a stand-in TITLE_ID instead of being dropped
             return {**common, "subpath": g.get("subpath", ""), "complete": True,
-                    "title_id": (g.get("title_id") or "").upper() or (m.group(1).upper() if m else ""),
+                    "title_id": (g.get("title_id") or "").upper() or (m.group(1).upper() if m else archive_stem(item)),
                     "name": game_title(g.get("param") or {}) or g.get("name", ""),
                     "version": g.get("version", ""), "req_fw": g.get("req_fw", ""),
                     "files": int(g.get("files", 0)), "has_eboot": True,
