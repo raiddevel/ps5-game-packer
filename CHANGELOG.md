@@ -1,6 +1,6 @@
 # Changes
 
-## 2.1.4 - 2026-10-13
+## 2.1.4 - 2026-10-14
 
 - A `param.json` on its own, as a loose file, alone inside a RAR/ZIP (even without the `sce_sys/` folder) or alone in
   a folder, is picked up as the fix for the game whose `sce_sys/param.json` is broken or missing: it goes on top as
